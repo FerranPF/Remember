@@ -14,15 +14,18 @@ public class PlayerController : MonoBehaviour
     bool canInteract = false;
     bool canMove = true;
     bool specialObject = false;
+    bool door = false;
 
-    bool key = false;
+
+    public bool key = false;
 
     private void Awake()
     {
-        //animator.GetComponent<Animator>();
         gameManager = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<GameManager>();
-    }
+        animator = gameObject.GetComponentInChildren<Animator>();
 
+        Cursor.lockState = CursorLockMode.Locked;
+    }
 
     void FixedUpdate()
     {
@@ -31,11 +34,16 @@ public class PlayerController : MonoBehaviour
             moveDirection.x = Input.GetAxis("Horizontal");
             moveDirection.z = Input.GetAxis("Vertical");
 
-            this.transform.Translate(moveDirection * speed, Space.World);
+            this.transform.Translate(moveDirection * speed * Time.deltaTime, Space.World);
 
             if (moveDirection != Vector3.zero)
             {
+                animator.SetBool("walk", true);
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(moveDirection.normalized), 0.2f);
+            }
+            else
+            {
+                animator.SetBool("walk", false);
             }
         }
     }
@@ -59,11 +67,33 @@ public class PlayerController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 specialObject.ShowObject();
-                canMove = false;
+                LockMovement();
+            }
+        }
+
+        if (door)
+        {
+            if (key)
+            {
+                gameManager.OpenInteractivePanel(2);
+                if (Input.GetKeyDown(KeyCode.Q))
+                {
+                    UseKey();
+                }
             }
         }
     }
 
+    public void GetKey()
+    {
+        key = true;
+        gameManager.OpenInteractivePanel(1);
+    }
+
+    public void UseKey()
+    {
+        gameManager.NextLevel();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -76,10 +106,21 @@ public class PlayerController : MonoBehaviour
 
         if(other.tag == "SpecialObject")
         {
+            gameManager.OpenInteractivePanel(0);
             specialObject = true;
             collInteractive = other;
         }
 
+        if (other.tag == "Door")
+        {
+            door = true;
+        }
+
+    }
+
+    public void LockMovement()
+    {
+        canMove = false;
     }
 
     public void ResetMovement()
@@ -98,8 +139,25 @@ public class PlayerController : MonoBehaviour
 
         if (other.tag == "SpecialObject")
         {
+            gameManager.CloseInteractivePanel();
             specialObject = false;
             collInteractive = null;
         }
+
+        if (other.tag == "Door")
+        {
+            door = false;
+        }
+    }
+
+    public void ResetPlayer()
+    {
+        gameManager.CloseKeyPanel();
+        gameManager.CloseInteractivePanel();
+        ResetMovement();
+        key = false;
+        door = false;
+        specialObject = false;
+        canInteract = false;
     }
 }
