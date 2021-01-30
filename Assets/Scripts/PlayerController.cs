@@ -82,6 +82,16 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            gameManager.OpenDialogue();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            gameManager.NextDialogue();
+        }
     }
 
     public void GetKey()
@@ -152,8 +162,6 @@ public class PlayerController : MonoBehaviour
 
     public void ResetPlayer()
     {
-        gameManager.CloseKeyPanel();
-        gameManager.CloseInteractivePanel();
         ResetMovement();
         key = false;
         door = false;
