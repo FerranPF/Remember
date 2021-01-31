@@ -10,48 +10,30 @@ public class DialogueSystem : MonoBehaviour
     public Text textDialogue;
     public Text inputKeyText;
 
-    private int dialoguePosition = 0;
-    public int[] dialogueEnd;
-    private bool firstScreen = true;
+    public int dialoguePosition = 0;
+    public bool firstScreen = false;
 
     GameManager gameManager;
 
-    private void Awake()
+    private void OnEnable()
     {
         gameManager = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<GameManager>();
     }
 
-    private void Start()
+    public void NextDialogue()
     {
-        NextDialogue(0);
-    }
-
-    public void NextDialogue(int level)
-    {
-        if (dialoguePosition == dialogueEnd[level])
+        Debug.Log("Next dialogue");
+        if (dialoguePosition == dialogue.Length)
         {
-            CloseDialogue();
+            gameManager.OpenDoor();
+            gameManager.CloseDialogue();
         }
         else
         {
             textDialogue.text = dialogue[dialoguePosition];
-            inputKeyText.text = "Press E to continue";
+            inputKeyText.text = "Presiona E para seguir";
 
             dialoguePosition++;
         }
     }
-
-    public void CloseDialogue()
-    {
-        if (firstScreen)
-        {
-            gameManager.CloseFirstScreen();
-            firstScreen = false;
-        }
-        else
-        {
-            gameManager.CloseDialogue();
-        }
-    }
-
 }

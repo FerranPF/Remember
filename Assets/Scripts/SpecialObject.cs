@@ -26,9 +26,8 @@ public class SpecialObject : MonoBehaviour
             float h = horizontalSpeed * Input.GetAxis("Mouse X");
             float v = verticalSpeed * Input.GetAxis("Mouse Y");
             transform.Rotate(v, 0, -h, Space.Self);
-            //Cursor.lockState = CursorLockMode.Locked;
 
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.E))
             {
                 ResetObject();
                 GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().ResetMovement();
@@ -42,7 +41,6 @@ public class SpecialObject : MonoBehaviour
         placed = false;
         this.transform.position = initialPosition;
         this.transform.eulerAngles = initialRotation;
-        //Cursor.lockState = CursorLockMode.None;
     }
 
     public void ShowObject()

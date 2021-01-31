@@ -8,123 +8,52 @@ public class GameManager : MonoBehaviour
 {
 
     private GameObject interactivePanel;
-    private GameObject keyPanel;
     private GameObject fadeInOut;
     private GameObject dialoguePanel;
-    private GameObject firstScreen;
+    public Text interactiveText;
 
     private PlayerController playerController;
 
-    private int level = 0;
-
-    public Animator[] levelDoors;
-    public GameObject[] levelPositions;
+    public Animator levelDoors;
 
     public bool dialogue = false;
-
-
-    float count = 0;
-    private bool closeFirstScreen = false;
 
     private void Awake()
     {
         interactivePanel = GameObject.Find("InteractivePanel");
-        keyPanel = GameObject.Find("KeyPanel");
         fadeInOut = GameObject.Find("FadeInOut");
         dialoguePanel = GameObject.Find("DialoguePanel");
-        firstScreen = GameObject.Find("FirstScreen");
+        levelDoors = GameObject.FindGameObjectWithTag("Door").GetComponent<Animator>();
         
         playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
 
+        dialoguePanel.SetActive(false);
         interactivePanel.SetActive(false);
-        keyPanel.SetActive(false);
-        firstScreen.SetActive(true);
     }
 
     public void NextLevel()
     {
-        StartCoroutine(NextLevelCoroutine());
-    }
-
-    IEnumerator NextLevelCoroutine()
-    {
-
         fadeInOut.SetActive(true);
         fadeInOut.GetComponent<Animator>().SetBool("fade", true);
-        playerController.LockMovement();
-
-        yield return new WaitForSecondsRealtime(1.1f);
-
-        playerController.transform.position = levelPositions[level].transform.position;
-
-        yield return new WaitForSecondsRealtime(0.5f);
-
-        CloseInteractivePanel();
-        CloseKeyPanel();
-        fadeInOut.GetComponent<Animator>().SetBool("fade", false);
-
-        yield return new WaitForSecondsRealtime(0.9f);
-
-        playerController.ResetPlayer();
-        level++;
     }
 
     public void OpenDoor()
     {
-        levelDoors[level].SetBool("open", true);
+        levelDoors.SetBool("open", true);
     }
 
-    public void FadeIn()
-    {
-        StartCoroutine(FadeInCoroutine());
-    }
-
-    IEnumerator FadeInCoroutine()
-    {
-        fadeInOut.SetActive(true);
-        fadeInOut.GetComponent<Animator>().SetBool("fade", false);
-        playerController.LockMovement();
-
-        yield return new WaitForSeconds(1.1f);
-
-        playerController.ResetMovement();
-    }
-
-
-    public void FadeOut()
-    {
-        StartCoroutine(FadeOutCoroutine());
-    }
-
-    IEnumerator FadeOutCoroutine()
-    {
-        fadeInOut.SetActive(true);
-        fadeInOut.GetComponent<Animator>().SetBool("fade", true);
-        playerController.LockMovement();
-
-        yield return new WaitForSeconds(1.1f);
-
-        playerController.ResetMovement();
-    }
-
-
-
-    public void OpenInteractivePanel(int interactiveType)
+    public void OpenInteractivePanel(int interactiveType, string textShown)
     {
         switch (interactiveType)
         {
             case 0:
                 interactivePanel.SetActive(true);
+                interactiveText.text = textShown;
                 break;
             case 1:
-                if(level > 0)
-                {
-                    levelDoors[level].SetBool("open", true);
-                }
-                keyPanel.SetActive(true);
-                break;
-            case 2:
                 interactivePanel.SetActive(true);
+                interactiveText.text = textShown;
+                levelDoors.SetBool("open", true);
                 break;
             default:
                 break;
@@ -136,23 +65,19 @@ public class GameManager : MonoBehaviour
         interactivePanel.SetActive(false);
     }
 
-    public void CloseKeyPanel()
-    {
-        keyPanel.SetActive(false);
-    }
-
     public void OpenDialogue()
     {
         CloseInteractivePanel();
         playerController.LockMovement();
 
         dialogue = true;
+        playerController.dialogue = dialogue;
         dialoguePanel.SetActive(true);
     }
 
     public void NextDialogue()
     {
-        dialoguePanel.GetComponent<DialogueSystem>().NextDialogue(level);
+        dialoguePanel.GetComponent<DialogueSystem>().NextDialogue();
     }
 
     public void CloseDialogue()
@@ -160,44 +85,12 @@ public class GameManager : MonoBehaviour
         playerController.ResetMovement();
 
         dialogue = false;
+        playerController.dialogue = dialogue;
         dialoguePanel.SetActive(false);
     }
 
-    public void CloseFirstScreen()
+    public void ChangeScene(string sceneIndex)
     {
-        closeFirstScreen = true;
-        count = 0;
+        SceneManager.LoadScene(sceneIndex);
     }
-
-    private void Update()
-    {
-        if (closeFirstScreen)
-        {
-            fadeInOut.SetActive(true);
-            count += Time.deltaTime;
-
-            if(count < 1.0f)
-            {
-                fadeInOut.GetComponent<Animator>().SetBool("fade", true);
-                playerController.LockMovement();
-
-            }else if(count < 2.2f)
-            {
-                firstScreen.SetActive(false);
-                CloseDialogue();
-
-            }else if(count < 2.6f)
-            {
-                playerController.transform.position = levelPositions[level].transform.position;
-                fadeInOut.GetComponent<Animator>().SetBool("fade", false);
-
-            }else if(count < 3.7f){
-
-                playerController.ResetPlayer();
-                level = 1;
-            }
-            else { closeFirstScreen = false; }
-        }
-    }
-
 }

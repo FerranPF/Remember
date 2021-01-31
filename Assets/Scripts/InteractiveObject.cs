@@ -9,7 +9,6 @@ public class InteractiveObject : MonoBehaviour
     bool open = false;
     bool isAnimating = false;
 
-    public bool giveObject = false;
     public GameObject interactiveGO;
 
     void Awake()
@@ -32,15 +31,12 @@ public class InteractiveObject : MonoBehaviour
                 animator.SetBool("open", true);
                 open = true;
                 isAnimating = true;
-                if (giveObject)
+
+                bool key = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().key;
+                if (!key)
                 {
-                    bool key = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().key;
-                    if (!key)
-                    {
-                        GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().GetKey();
-                        Destroy(interactiveGO);
-                        giveObject = false;
-                    }
+                    //GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>().GetKey();
+                    Destroy(interactiveGO);
                 }
             }
         }
